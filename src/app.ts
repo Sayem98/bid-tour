@@ -1,7 +1,8 @@
 import express from "express";
-import { getUser } from "./module.user/controller/user";
+import { router } from "./routes";
+
 const app = express();
 
-app.get("/", getUser);
+app.use("/api/v1", router);
 
 export { app };
