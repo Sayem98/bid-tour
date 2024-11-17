@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from "express";
 import {
   getAUser,
   getAllUsers,
@@ -7,7 +7,7 @@ import {
   createAUser,
 } from "./controller";
 
-const router = express.Router();
+const router: Router = Router();
 
 router.route("/").get(getAllUsers).post(createAUser);
 router.route("/:id").get(getAUser).put(updateAUser).delete(deleteAUser);

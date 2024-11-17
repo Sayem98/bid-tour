@@ -1,9 +1,7 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import type { Mongoose } from "mongoose";
-dotenv.config({
-  path: "./config.env",
-});
+dotenv.config();
 import { app } from "./app";
 
 const local_db = process.env.DATABASE_LOCAL || "";

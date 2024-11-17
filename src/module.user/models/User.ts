@@ -1,4 +1,5 @@
 import { Schema, model, Document } from "mongoose";
+import bcrypt from "bcryptjs";
 
 interface IUserInput {
   name: {
@@ -7,6 +8,7 @@ interface IUserInput {
   };
   email: string;
   password: string;
+  confirmPassword: string;
   phone: string;
   address: {
     city: string;
@@ -18,6 +20,10 @@ interface IUserInput {
 
 interface IUserDoc extends IUserInput, Document {
   role: string;
+  correctPassword(
+    candidatePassword: string,
+    userPassword: string
+  ): Promise<boolean>;
 }
 
 const UserSchema = new Schema<IUserDoc>({
@@ -26,7 +32,18 @@ const UserSchema = new Schema<IUserDoc>({
     last: { type: String, required: true },
   },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, minlength: 8, select: false },
+  confirmPassword: {
+    type: String,
+    required: true,
+    minlength: 8,
+    validate: {
+      validator: function (value: string) {
+        return value === this.password;
+      },
+      message: "Password and confirm password must be the same",
+    },
+  },
   phone: { type: String, required: true },
   address: {
     city: { type: String, required: true },
@@ -36,6 +53,22 @@ const UserSchema = new Schema<IUserDoc>({
   photo: { type: String },
   role: { type: String, default: "user" },
 });
+
+UserSchema.pre<IUserDoc>("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  // this.password = bcrypt.hashSync(this.password, 12); // 12 cpu intensive?
+  this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(12));
+  this.confirmPassword = undefined!;
+
+  next();
+});
+
+UserSchema.methods.correctPassword = async function (
+  candidatePassword: string,
+  userPassword: string
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = model<IUserDoc>("User", UserSchema);
 

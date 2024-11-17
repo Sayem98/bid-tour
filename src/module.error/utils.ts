@@ -1,5 +1,6 @@
 import { Response } from "express";
-import type { AppError } from "./appError";
+import { AppError } from "./appError";
+import { Error } from "mongoose";
 
 const developmentError = (err: AppError, res: Response) => {
   res.status(err.statusCode).json({
@@ -27,4 +28,14 @@ const productionError = (err: AppError, res: Response) => {
   }
 };
 
-export { productionError, developmentError };
+const handleCastErrorDB = (err: AppError) => {
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  err.message = message;
+  return err;
+};
+// const handleCastErrorDB = (err: AppError) => {
+//   const message = `Invalid ${err.path}: ${err.value}.`;
+//   return new AppError({ message, statusCode: 400 });
+// };
+
+export { productionError, developmentError, handleCastErrorDB };

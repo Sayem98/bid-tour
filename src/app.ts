@@ -5,6 +5,9 @@ import { globalErrorHandler } from "./module.error/errorController";
 
 const app = express();
 
+app.use(express.json()); // For JSON data
+app.use(express.urlencoded({ extended: true })); // For form data
+
 app.use("/api/v1", router);
 
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
